@@ -23,16 +23,22 @@ const ModernAuth = ({ mode = 'login' }) => {
     setLoading(true);
     setError('');
 
+    if (!isLogin && formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
     try {
-      if (isLogin) {
-        await login(formData.email, formData.password);
+      const result = isLogin
+        ? await login(formData.email, formData.password)
+        : await register(formData.name, formData.email, formData.password);
+
+      if (result.success) {
+        navigate('/dashboard');
       } else {
-        if (formData.password !== formData.confirmPassword) {
-          throw new Error('Passwords do not match');
-        }
-        await register(formData.name, formData.email, formData.password);
+        setError(result.error || 'Authentication failed');
       }
-      navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Authentication failed');
     } finally {
