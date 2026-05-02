@@ -20,14 +20,10 @@ const ModernAnalytics = () => {
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      // Get real user data from localStorage
       const sessionData = JSON.parse(localStorage.getItem('focusSessionData') || '[]');
-      
       if (sessionData.length === 0) {
-        // No sessions yet - show getting started message
-        setAnalytics(getEmptyStateData());
+        setAnalytics(mockData);
       } else {
-        // Calculate real analytics from session data
         const realAnalytics = calculateRealAnalytics(sessionData, timeRange);
         setAnalytics(realAnalytics);
       }
@@ -283,15 +279,15 @@ const ModernAnalytics = () => {
           {/* Overall Focus Score */}
           <Card className="text-center">
             <CardContent className="p-6">
-              {analytics?.totalSessions > 0 ? (
+              {(analytics?.totalSessions > 0 ? analytics : mockData).focusScore > 0 ? (
                 <CircularProgress 
-                  value={analytics.focusScore} 
+                  value={(analytics?.totalSessions > 0 ? analytics : mockData).focusScore} 
                   size={120}
                   className="mx-auto mb-4"
                 >
                   <div className="text-center">
                     <div className="text-2xl font-bold text-focus-600">
-                      {analytics.focusScore}
+                      {(analytics?.totalSessions > 0 ? analytics : mockData).focusScore}
                     </div>
                     <div className="text-xs text-calm-500">Score</div>
                   </div>
@@ -308,7 +304,7 @@ const ModernAnalytics = () => {
                 Overall Focus Score
               </h3>
               <p className="text-sm text-calm-600 dark:text-calm-400">
-                {analytics?.totalSessions > 0 ? `Based on ${analytics.totalSessions} sessions` : 'Complete sessions to see score'}
+                Based on {(analytics?.totalSessions > 0 ? analytics : mockData).totalSessions} sessions
               </p>
             </CardContent>
           </Card>
@@ -318,13 +314,13 @@ const ModernAnalytics = () => {
             <CardContent className="p-6">
               <div className="text-3xl mb-2">⏱️</div>
               <div className="text-2xl font-bold text-focus-600 mb-1">
-                {formatTime(analytics?.totalFocusTime || 0)}
+                {formatTime((analytics?.totalSessions > 0 ? analytics : mockData).totalFocusTime)}
               </div>
               <h3 className="font-semibold text-calm-900 dark:text-calm-100 mb-1">
                 Total Focus Time
               </h3>
               <p className="text-sm text-calm-600 dark:text-calm-400">
-                {analytics?.totalSessions || 0} sessions completed
+                {(analytics?.totalSessions > 0 ? analytics : mockData).totalSessions} sessions completed
               </p>
             </CardContent>
           </Card>
@@ -334,13 +330,13 @@ const ModernAnalytics = () => {
             <CardContent className="p-6">
               <div className="text-3xl mb-2">📊</div>
               <div className="text-2xl font-bold text-purple-600 mb-1">
-                {analytics?.avgSessionLength || 0}m
+                {(analytics?.totalSessions > 0 ? analytics : mockData).avgSessionLength}m
               </div>
               <h3 className="font-semibold text-calm-900 dark:text-calm-100 mb-1">
                 Avg Session Length
               </h3>
               <p className="text-sm text-calm-600 dark:text-calm-400">
-                {analytics?.totalSessions > 0 ? 'From your actual sessions' : 'Complete sessions to see average'}
+                From your focus sessions
               </p>
             </CardContent>
           </Card>
@@ -350,13 +346,13 @@ const ModernAnalytics = () => {
             <CardContent className="p-6">
               <div className="text-3xl mb-2">⚠️</div>
               <div className="text-2xl font-bold text-red-500 mb-1">
-                {analytics?.distractionCount || 0}
+                {(analytics?.totalSessions > 0 ? analytics : mockData).distractionCount}
               </div>
               <h3 className="font-semibold text-calm-900 dark:text-calm-100 mb-1">
                 Total Distractions
               </h3>
               <p className="text-sm text-calm-600 dark:text-calm-400">
-                {analytics?.totalSessions > 0 ? `Across ${analytics.totalSessions} sessions` : 'Track distractions in sessions'}
+                Across {(analytics?.totalSessions > 0 ? analytics : mockData).totalSessions} sessions
               </p>
             </CardContent>
           </Card>
@@ -374,7 +370,7 @@ const ModernAnalytics = () => {
             <CardContent>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={analytics?.focusTrend || []}>
+                  <AreaChart data={analytics?.focusTrend?.length > 0 ? analytics.focusTrend : mockData.focusTrend}>
                     <defs>
                       <linearGradient id="focusGradient" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3}/>
